@@ -204,7 +204,6 @@ contract DividendDistributor is IDividendDistributor {
     uint256 public dividendsPerShare;
     uint256 public dividendsPerShareAccuracyFactor = 10 ** 36;
 
-    //SETMEUP, change this to 1 hour instead of 10mins
     uint256 public minPeriod = 30 * 45;
     uint256 public minDistribution = 1 * (10 ** 16);
 
@@ -357,9 +356,9 @@ contract BabyCosmos is IBEP20, Auth {
     uint8 constant _decimals = 4;
 
     uint256 _totalSupply = 200 * 10**6 * (10 ** _decimals);
+
     uint256 public _maxTxAmount = 500000 * (10 ** _decimals);
 
-    //max wallet holding of 2% 
     uint256 public _maxWalletToken = 200000 * (10 ** _decimals);
 
     mapping (address => uint256) _balances;
@@ -391,7 +390,6 @@ contract BabyCosmos is IBEP20, Auth {
     DividendDistributor distributor;
     uint256 distributorGas = 500000;
 
-    // Cooldown & timer functionality
     bool public buyCooldownEnabled = true;
     uint8 public cooldownTimerInterval = 60;
     mapping (address => uint) private cooldownTimer;
@@ -411,7 +409,6 @@ contract BabyCosmos is IBEP20, Auth {
         isFeeExempt[msg.sender] = true;
         isTxLimitExempt[msg.sender] = true;
 
-        // No timelock for these people
         isTimelockExempt[msg.sender] = true;
         isTimelockExempt[DEAD] = true;
         isTimelockExempt[address(this)] = true;
@@ -474,7 +471,7 @@ contract BabyCosmos is IBEP20, Auth {
         // max wallet code
         if (!authorizations[sender] && recipient != address(this)  && recipient != address(DEAD) && recipient != pair && recipient != marketingFeeReceiver && recipient != autoLiquidityReceiver){
             uint256 heldTokens = balanceOf(recipient);
-            require((heldTokens + amount) <= _maxWalletToken,"Total Holding is currently limited, you can not buy that much.");}
+            require((heldTokens + amount) <= _maxWalletToken,"Total Holding is currently limited, max wallet size error");}
         
 
         
@@ -482,7 +479,7 @@ contract BabyCosmos is IBEP20, Auth {
         if (sender == pair &&
             buyCooldownEnabled &&
             !isTimelockExempt[recipient]) {
-            require(cooldownTimer[recipient] < block.timestamp,"Please wait for 1min between two buys");
+            require(cooldownTimer[recipient] < block.timestamp,"Please wait for cooldown between two buys");
             cooldownTimer[recipient] = block.timestamp + cooldownTimerInterval;
         }
 
